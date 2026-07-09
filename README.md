@@ -24,3 +24,12 @@ A responsive React + Vite + TypeScript + Tailwind CSS client interface for the S
    npm run dev
    ```
    *Client will be active at [http://localhost:3000](http://localhost:3000).*
+
+
+## Client Technologies
+- React.js
+- Vite
+- TypeScript
+- Tailwind CSS
+- Recharts
+- Lucide React
