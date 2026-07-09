@@ -33,3 +33,6 @@ A responsive React + Vite + TypeScript + Tailwind CSS client interface for the S
 - Tailwind CSS
 - Recharts
 - Lucide React
+
+## Licensing
+MIT License
