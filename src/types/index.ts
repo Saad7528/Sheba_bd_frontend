@@ -61,3 +61,5 @@ export interface WeeklyStats {
   dateKey: string;
   appointments: number;
 }
+
+// End of Application TypeScript Interfaces
