@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Since we have a proxy configured in Vite, we can use /api relative URL
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 });
 
 // Interceptor to attach the token
