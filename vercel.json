@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://sheba-bd-backend.vercel.app/api/:path*"
+    }
+  ]
+}
