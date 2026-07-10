@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Doctor } from '../types';
-import { Star, MapPin, Award, Stethoscope } from 'lucide-react';
+import { Star, MapPin, Award } from 'lucide-react';
 
 interface DoctorCardProps {
   doctor: Doctor;
