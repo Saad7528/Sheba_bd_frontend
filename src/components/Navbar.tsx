@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-6">
             <NavLink to="/" className={linkClass}>
               Home
             </NavLink>
@@ -53,14 +53,17 @@ const Navbar: React.FC = () => {
               Find Doctors
             </NavLink>
             {isAuthenticated && (
-              <NavLink to="/manage-appointments" className={linkClass}>
-                Appointments
-              </NavLink>
-            )}
-            {(user?.role === 'doctor' || user?.role === 'admin') && (
-              <NavLink to="/add-doctor" className={linkClass}>
-                Add Doctor
-              </NavLink>
+              <>
+                <NavLink to="/manage-appointments" className={linkClass}>
+                  Appointments
+                </NavLink>
+                <NavLink to="/items/manage" className={linkClass}>
+                  Manage Profiles
+                </NavLink>
+                <NavLink to="/items/add" className={linkClass}>
+                  Add Profile
+                </NavLink>
+              </>
             )}
             <NavLink to="/about" className={linkClass}>
               About Us
@@ -134,14 +137,17 @@ const Navbar: React.FC = () => {
               Find Doctors
             </NavLink>
             {isAuthenticated && (
-              <NavLink to="/manage-appointments" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
-                Appointments
-              </NavLink>
-            )}
-            {(user?.role === 'doctor' || user?.role === 'admin') && (
-              <NavLink to="/add-doctor" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
-                Add Doctor
-              </NavLink>
+              <>
+                <NavLink to="/manage-appointments" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                  Appointments
+                </NavLink>
+                <NavLink to="/items/manage" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                  Manage Profiles
+                </NavLink>
+                <NavLink to="/items/add" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                  Add Profile
+                </NavLink>
+              </>
             )}
             <NavLink to="/about" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
               About Us

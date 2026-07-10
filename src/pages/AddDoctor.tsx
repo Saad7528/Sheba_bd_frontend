@@ -96,19 +96,7 @@ const AddDoctor: React.FC = () => {
     }
   };
 
-  // Block unauthorized role
-  if (user?.role !== 'doctor' && user?.role !== 'admin') {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center flex-grow">
-        <ShieldAlert className="w-16 h-16 text-accent mx-auto mb-4" />
-        <h2 className="text-2xl font-bold text-slate-800">Access Denied</h2>
-        <p className="text-slate-600 mt-2">Only doctors and system administrators are allowed to add doctor profiles.</p>
-        <button onClick={() => navigate('/')} className="mt-6 inline-block bg-primary text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-dark">
-          Back to Homepage
-        </button>
-      </div>
-    );
-  }
+  // Allowed for any logged in user as per standard items/add requirement
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">

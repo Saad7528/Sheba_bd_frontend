@@ -11,6 +11,7 @@ import DoctorProfile from './pages/DoctorProfile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AddDoctor from './pages/AddDoctor';
+import ManageDoctors from './pages/ManageDoctors';
 import ManageAppointments from './pages/ManageAppointments';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -50,6 +51,25 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute allowedRoles={['doctor', 'admin']}>
                   <AddDoctor />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected Items Routes (All logged in users as per requirements) */}
+            <Route
+              path="/items/add"
+              element={
+                <ProtectedRoute>
+                  <AddDoctor />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/items/manage"
+              element={
+                <ProtectedRoute>
+                  <ManageDoctors />
                 </ProtectedRoute>
               }
             />
