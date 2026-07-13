@@ -11,6 +11,7 @@ interface AuthContextType {
   registerUser: (name: string, email: string, password: string, role: 'patient' | 'doctor' | 'admin') => Promise<any>;
   logout: () => void;
   updateUser: (userData: User) => void;
+  googleLogin: (credential: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,6 +91,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const googleLogin = async (credential: string) => {
+    setIsLoading(true);
+    try {
+      const response = await API.post('/auth/google', { credential });
+      const { token: receivedToken, user: receivedUser } = response.data;
+      
+      localStorage.setItem('token', receivedToken);
+      setToken(receivedToken);
+      setUser(receivedUser);
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data?.message || 'Google Sign-In failed. Please try again.';
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const updateUser = (userData: User) => {
     setUser(userData);
   };
@@ -97,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, isLoading, login, registerUser, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, isLoading, login, registerUser, logout, updateUser, googleLogin }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, Mail, Lock, Heart, LogIn } from 'lucide-react';
 
 const Login: React.FC = () => {
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,6 +14,42 @@ const Login: React.FC = () => {
 
   // Get the redirect path from router location state
   const from = (location.state as any)?.from?.pathname || '/';
+
+  useEffect(() => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1069818817342-99o0u29k0b4352n8a38i728t38r6a17b.apps.googleusercontent.com'; // Default placeholder/fallback if not in env
+
+    const initializeGoogleSignIn = () => {
+      // @ts-ignore
+      if (window.google?.accounts?.id) {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: async (response: any) => {
+            setError('');
+            try {
+              await googleLogin(response.credential);
+              navigate(from, { replace: true });
+            } catch (err: any) {
+              setError(err);
+            }
+          }
+        });
+
+        // @ts-ignore
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+      }
+    };
+
+    // Retry initialization briefly after mount in case the script is loading async
+    const timer = setTimeout(() => {
+      initializeGoogleSignIn();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [googleLogin, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,27 +61,6 @@ const Login: React.FC = () => {
     setError('');
     try {
       await login(email, password);
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err);
-    }
-  };
-
-  // Demo accounts credentials helper
-  const handleDemoFill = async (role: 'patient' | 'doctor' | 'admin') => {
-    setError('');
-    
-    let demoEmail = '';
-    if (role === 'patient') {
-      demoEmail = 'patient@healthbd.com';
-    } else if (role === 'doctor') {
-      demoEmail = 'doctor@healthbd.com';
-    } else {
-      demoEmail = 'admin@healthbd.com';
-    }
-
-    try {
-      await login(demoEmail, 'password123');
       navigate(from, { replace: true });
     } catch (err: any) {
       setError(err);
@@ -119,30 +134,13 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        {/* Demo Logins Quick Bar */}
-        <div className="pt-6 border-t border-slate-100 space-y-3">
+        {/* Google Sign-In Button */}
+        <div className="pt-6 border-t border-slate-100 space-y-4">
           <span className="block text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-            Quick Demo Accounts Login
+            Or Sign In with Google
           </span>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              onClick={() => handleDemoFill('patient')}
-              className="py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-100 rounded-xl text-xs font-bold transition-colors"
-            >
-              Patient
-            </button>
-            <button
-              onClick={() => handleDemoFill('doctor')}
-              className="py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-xl text-xs font-bold transition-colors"
-            >
-              Doctor
-            </button>
-            <button
-              onClick={() => handleDemoFill('admin')}
-              className="py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 rounded-xl text-xs font-bold transition-colors"
-            >
-              Admin
-            </button>
+          <div className="flex justify-center">
+            <div id="google-signin-btn" className="w-full min-h-[40px]"></div>
           </div>
         </div>
 
