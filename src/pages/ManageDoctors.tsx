@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { Doctor } from '../types';
+import { useAuth } from '../context/AuthContext';
 import { Eye, Trash2, Plus, Stethoscope, AlertCircle, Search } from 'lucide-react';
 
 const ManageDoctors: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -52,12 +54,17 @@ const ManageDoctors: React.FC = () => {
     }
   };
 
-  // Filter local doctors by name or specialty search
-  const filteredDoctors = doctors.filter(
-    (doc) =>
+  // Filter local doctors by role ownership, name or specialty search
+  const filteredDoctors = doctors.filter((doc) => {
+    // If user is a doctor, they can only see and manage their own profile
+    if (user?.role === 'doctor' && doc.userId !== user.id) {
+      return false;
+    }
+    return (
       doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    );
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
