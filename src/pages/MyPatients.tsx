@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import API from '../services/api';
 import { Appointment } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { User, Clipboard, AlertCircle, FileText, ChevronRight, X, Heart, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { User, Clipboard, AlertCircle, FileText, ChevronRight, X, Heart, PlusCircle, CheckCircle2, Download } from 'lucide-react';
 
 interface PatientGroup {
   patientId: string;
@@ -72,6 +72,288 @@ const MyPatients: React.FC = () => {
   patientGroups.forEach((g) => {
     g.appointments.sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime());
   });
+
+  const handleDownloadPrescription = (app: Appointment) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to download/print the prescription.');
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Prescription - ${app.patientName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            margin: 0;
+            padding: 40px;
+            background-color: #ffffff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .prescription-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            background: #ffffff;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #4f46e5;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .brand {
+            display: flex;
+            align-items: center;
+            color: #4f46e5;
+            font-size: 20px;
+            font-weight: 800;
+          }
+          .brand-logo {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            background: #4f46e5;
+            border-radius: 6px;
+          }
+          .doctor-info {
+            text-align: right;
+          }
+          .doctor-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+          }
+          .doctor-details {
+            font-size: 11px;
+            color: #64748b;
+            margin: 3px 0 0 0;
+            line-height: 1.4;
+          }
+          .patient-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 15px 20px;
+            margin-bottom: 35px;
+            font-size: 11px;
+          }
+          .patient-bar div span {
+            display: block;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            margin-bottom: 2px;
+          }
+          .patient-bar div strong {
+            color: #0f172a;
+            font-weight: 700;
+          }
+          .rx-container {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 40px;
+            min-height: 400px;
+          }
+          .left-col {
+            border-right: 1px solid #e2e8f0;
+            padding-right: 20px;
+          }
+          .rx-symbol {
+            font-size: 32px;
+            font-weight: 800;
+            color: #4f46e5;
+            font-family: serif;
+            margin-bottom: 20px;
+          }
+          .section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            display: block;
+          }
+          .symptoms-box {
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.6;
+            font-style: italic;
+          }
+          .right-col {
+            padding-left: 10px;
+          }
+          .diagnosis-box {
+            margin-bottom: 30px;
+          }
+          .diagnosis-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .medicine-item {
+            margin-bottom: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+            background-color: #f8fafc;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4f46e5;
+          }
+          .medicine-name {
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .advice-box {
+            margin-top: 40px;
+            background-color: #eff6ff;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 12px;
+            color: #1e3a8a;
+          }
+          .footer {
+            margin-top: 50px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: #94a3b8;
+          }
+          .signature {
+            text-align: right;
+          }
+          .sig-line {
+            width: 150px;
+            border-bottom: 1px solid #cbd5e1;
+            margin-bottom: 5px;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .prescription-card {
+              border: none;
+              padding: 0;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="prescription-card">
+          <div class="header">
+            <div class="brand">
+              <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;background:#4f46e5;padding:4px;border-radius:6px;margin-right:8px;">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              Sheba BD
+            </div>
+            <div class="doctor-info">
+              <h4 class="doctor-name">${app.doctorName}</h4>
+              <p class="doctor-details">
+                Specialty: ${app.doctorSpecialty}<br>
+                Consultant, Sheba BD Chamber
+              </p>
+            </div>
+          </div>
+
+          <div class="patient-bar">
+            <div>
+              <span>Patient Name</span>
+              <strong>${app.patientName}</strong>
+            </div>
+            <div>
+              <span>Phone</span>
+              <strong>${app.patientPhone}</strong>
+            </div>
+            <div>
+              <span>Date</span>
+              <strong>${new Date(app.appointmentDate).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+            </div>
+            <div>
+              <span>Time Slot</span>
+              <strong>${app.timeSlot}</strong>
+            </div>
+          </div>
+
+          <div class="rx-container">
+            <div class="left-col">
+              <div class="rx-symbol">Rx</div>
+              
+              <span class="section-title">Symptoms Notes</span>
+              <div class="symptoms-box">
+                ${app.notes || 'None recorded'}
+              </div>
+            </div>
+
+            <div class="right-col">
+              <div class="diagnosis-box">
+                <span class="section-title">Diagnosis</span>
+                <div class="diagnosis-text">${app.prescription?.diagnosis || 'N/A'}</div>
+              </div>
+
+              <span class="section-title">Rx Medicines / Instructions</span>
+              <div style="margin-top: 10px;">
+                ${app.prescription?.medicines ? app.prescription.medicines.split('\n').map(med => `
+                  <div class="medicine-item">
+                    <div class="medicine-name">${med}</div>
+                  </div>
+                `).join('') : 'No medicines recorded'}
+              </div>
+
+              ${app.prescription?.advice ? `
+                <div class="advice-box">
+                  <span class="section-title" style="color: #1e3a8a;">Doctor's Advice</span>
+                  <div>${app.prescription.advice}</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="footer">
+            <div>This is an electronically generated prescription from Sheba BD.</div>
+            <div class="signature">
+              <div class="sig-line"></div>
+              <span>Authorized Signature</span>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
 
   const handleOpenHistory = (patient: PatientGroup) => {
     setSelectedPatient(patient);
@@ -296,13 +578,25 @@ const MyPatients: React.FC = () => {
                         <FileText className="w-4 h-4 mr-1 text-primary" /> Diagnosis & Prescription
                       </span>
                       {editingAppointmentId !== app._id && (
-                        <button
-                          onClick={() => handleStartPrescribe(app)}
-                          className="text-[10px] font-bold text-primary hover:underline flex items-center"
-                        >
-                          <PlusCircle className="w-3.5 h-3.5 mr-1" />
-                          {app.prescription ? 'Edit Prescription' : 'Write Prescription'}
-                        </button>
+                        <div className="flex items-center space-x-3">
+                          {app.prescription && (
+                            <button
+                              onClick={() => handleDownloadPrescription(app)}
+                              className="text-[10px] font-bold text-slate-500 hover:text-primary hover:underline flex items-center space-x-1"
+                              title="Download PDF"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>PDF</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleStartPrescribe(app)}
+                            className="text-[10px] font-bold text-primary hover:underline flex items-center"
+                          >
+                            <PlusCircle className="w-3.5 h-3.5 mr-1" />
+                            {app.prescription ? 'Edit' : 'Write Prescription'}
+                          </button>
+                        </div>
                       )}
                     </div>
 
