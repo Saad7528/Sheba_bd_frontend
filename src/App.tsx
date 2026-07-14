@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import AddDoctor from './pages/AddDoctor';
 import ManageDoctors from './pages/ManageDoctors';
 import ManageAppointments from './pages/ManageAppointments';
+import MyPatients from './pages/MyPatients';
 import About from './pages/About';
 import Contact from './pages/Contact';
 
@@ -70,6 +71,15 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute allowedRoles={['doctor', 'admin']}>
                   <ManageDoctors />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/my-patients"
+              element={
+                <ProtectedRoute allowedRoles={['doctor', 'admin']}>
+                  <MyPatients />
                 </ProtectedRoute>
               }
             />

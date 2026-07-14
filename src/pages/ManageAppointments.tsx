@@ -282,6 +282,27 @@ const ManageAppointments: React.FC = () => {
                               <span className="font-bold text-slate-700">Symptoms Notes:</span>{' '}
                               <span className="italic">{app.notes || 'None provided.'}</span>
                             </p>
+                            {app.prescription && (
+                              <div className="mt-4 pt-3 border-t border-slate-200/50 space-y-2">
+                                <h5 className="font-bold text-xs text-slate-900 flex items-center">
+                                  <FileText className="w-4 h-4 mr-1 text-primary" /> Diagnosis & Prescription Details
+                                </h5>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-4 rounded-xl border border-slate-100">
+                                  <div>
+                                    <span className="block text-[9px] font-bold text-slate-400 uppercase">Diagnosis</span>
+                                    <span className="font-bold text-slate-800">{app.prescription.diagnosis}</span>
+                                  </div>
+                                  <div className="md:col-span-2">
+                                    <span className="block text-[9px] font-bold text-slate-400 uppercase">Medicines / Dosage</span>
+                                    <span className="font-medium text-slate-800 whitespace-pre-line">{app.prescription.medicines}</span>
+                                  </div>
+                                  <div className="md:col-span-3 border-t border-slate-100 pt-2">
+                                    <span className="block text-[9px] font-bold text-slate-400 uppercase">Doctor Advice</span>
+                                    <span className="font-light text-slate-600">{app.prescription.advice || 'None'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -313,6 +334,14 @@ const ManageAppointments: React.FC = () => {
                     <p><span className="font-bold text-slate-500">Fee:</span> ৳{app.visitingFee}</p>
                     {app.notes && (
                       <p><span className="font-bold text-slate-500">Notes:</span> <span className="italic font-light">{app.notes}</span></p>
+                    )}
+                    {app.prescription && (
+                      <div className="mt-2 pt-2 border-t border-slate-200/50 space-y-1 text-left">
+                        <span className="block text-[9px] font-bold text-slate-400 uppercase">Prescription</span>
+                        <p><span className="font-bold text-slate-500">Diagnosis:</span> {app.prescription.diagnosis}</p>
+                        <p className="whitespace-pre-line"><span className="font-bold text-slate-500">Meds:</span> {app.prescription.medicines}</p>
+                        {app.prescription.advice && <p><span className="font-bold text-slate-500">Advice:</span> {app.prescription.advice}</p>}
+                      </div>
                     )}
                   </div>
 

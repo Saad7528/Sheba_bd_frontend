@@ -58,9 +58,14 @@ const Navbar: React.FC = () => {
                   Appointments
                 </NavLink>
                 {user && (user.role === 'doctor' || user.role === 'admin') && (
-                  <NavLink to="/items/manage" className={linkClass}>
-                    Manage Profiles
-                  </NavLink>
+                  <>
+                    <NavLink to="/items/manage" className={linkClass}>
+                      Manage Profiles
+                    </NavLink>
+                    <NavLink to="/my-patients" className={linkClass}>
+                      My Patients
+                    </NavLink>
+                  </>
                 )}
                 {user && user.role === 'admin' && (
                   <NavLink to="/items/add" className={linkClass}>
@@ -146,9 +151,14 @@ const Navbar: React.FC = () => {
                   Appointments
                 </NavLink>
                 {user && (user.role === 'doctor' || user.role === 'admin') && (
-                  <NavLink to="/items/manage" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
-                    Manage Profiles
-                  </NavLink>
+                  <>
+                    <NavLink to="/items/manage" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                      Manage Profiles
+                    </NavLink>
+                    <NavLink to="/my-patients" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                      My Patients
+                    </NavLink>
+                  </>
                 )}
                 {user && user.role === 'admin' && (
                   <NavLink to="/items/add" className={mobileLinkClass} onClick={() => setIsOpen(false)}>

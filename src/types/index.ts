@@ -46,6 +46,11 @@ export interface Appointment {
   visitingFee: number;
   status: 'pending' | 'approved' | 'cancelled';
   notes?: string;
+  prescription?: {
+    diagnosis: string;
+    medicines: string;
+    advice: string;
+  };
   createdAt: string;
 }
 
