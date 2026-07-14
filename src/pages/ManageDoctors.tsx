@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { Doctor } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { Eye, Trash2, Plus, Stethoscope, AlertCircle, Search } from 'lucide-react';
+import { Eye, Trash2, Plus, Stethoscope, AlertCircle, Search, Edit2, Clock, X } from 'lucide-react';
 
 const ManageDoctors: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +13,84 @@ const ManageDoctors: React.FC = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Edit Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  
+  const [editName, setEditName] = useState('');
+  const [editSpecialty, setEditSpecialty] = useState('');
+  const [editDegrees, setEditDegrees] = useState('');
+  const [editVisitingFee, setEditVisitingFee] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editChamber, setEditChamber] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editSchedule, setEditSchedule] = useState<string[]>([]);
+  const [editLoading, setEditLoading] = useState(false);
+
+  const handleEditClick = (doc: Doctor) => {
+    setSelectedDoctor(doc);
+    setEditName(doc.name);
+    setEditSpecialty(doc.specialty);
+    setEditDegrees(doc.degrees);
+    setEditVisitingFee(String(doc.visitingFee));
+    setEditLocation(doc.location);
+    setEditChamber(doc.chamber);
+    setEditImageUrl(doc.imageUrl);
+    setEditDescription(doc.description);
+    setEditSchedule(doc.schedule);
+    setShowEditModal(true);
+  };
+
+  const handleScheduleChange = (index: number, val: string) => {
+    const updated = [...editSchedule];
+    updated[index] = val;
+    setEditSchedule(updated);
+  };
+
+  const addScheduleField = () => {
+    setEditSchedule([...editSchedule, '']);
+  };
+
+  const removeScheduleField = (index: number) => {
+    const updated = editSchedule.filter((_, i) => i !== index);
+    setEditSchedule(updated);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDoctor) return;
+
+    setEditLoading(true);
+    setError('');
+    try {
+      await API.put(`/doctors/${selectedDoctor._id}`, {
+        name: editName,
+        specialty: editSpecialty,
+        degrees: editDegrees,
+        visitingFee: Number(editVisitingFee),
+        location: editLocation,
+        chamber: editChamber,
+        imageUrl: editImageUrl,
+        description: editDescription,
+        schedule: editSchedule.filter(s => s.trim() !== '')
+      });
+
+      setSuccessMsg('Doctor profile updated successfully.');
+      setShowEditModal(false);
+      fetchDoctors();
+
+      setTimeout(() => {
+        setSuccessMsg('');
+      }, 4000);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to update doctor profile.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
 
   const fetchDoctors = async () => {
     setLoading(true);
@@ -177,12 +255,21 @@ const ManageDoctors: React.FC = () => {
                         <Eye className="w-4 h-4" />
                       </Link>
                       <button
-                        onClick={() => handleDelete(doc._id, doc.name)}
-                        className="inline-flex items-center p-2 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-                        title="Delete Profile"
+                        onClick={() => handleEditClick(doc)}
+                        className="inline-flex items-center p-2 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-xl transition-all"
+                        title="Edit Profile"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" />
                       </button>
+                      {user?.role === 'admin' && (
+                        <button
+                          onClick={() => handleDelete(doc._id, doc.name)}
+                          className="inline-flex items-center p-2 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                          title="Delete Profile"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -217,15 +304,26 @@ const ManageDoctors: React.FC = () => {
                   <Link
                     to={`/doctors/${doc._id}`}
                     className="p-2 bg-white text-slate-600 hover:text-primary rounded-lg border border-slate-200"
+                    title="View Details"
                   >
                     <Eye className="w-4 h-4" />
                   </Link>
                   <button
-                    onClick={() => handleDelete(doc._id, doc.name)}
-                    className="p-2 bg-white text-slate-600 hover:text-rose-600 rounded-lg border border-slate-200"
+                    onClick={() => handleEditClick(doc)}
+                    className="p-2 bg-white text-slate-600 hover:text-primary rounded-lg border border-slate-200"
+                    title="Edit Profile"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Edit2 className="w-4 h-4" />
                   </button>
+                  {user?.role === 'admin' && (
+                    <button
+                      onClick={() => handleDelete(doc._id, doc.name)}
+                      className="p-2 bg-white text-slate-600 hover:text-rose-600 rounded-lg border border-slate-200"
+                      title="Delete Profile"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -235,6 +333,188 @@ const ManageDoctors: React.FC = () => {
         <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl shadow-sm">
           <Stethoscope className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <p className="text-slate-600 font-medium">No doctor profiles found matching your search.</p>
+        </div>
+      )}
+      {/* Edit Doctor Profile Modal */}
+      {showEditModal && selectedDoctor && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl border border-slate-100 shadow-2xl p-6 md:p-8 relative text-left animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-xl font-extrabold text-slate-900 tracking-tight font-sans mb-1">
+              Edit Doctor Profile
+            </h3>
+            <p className="text-xs text-slate-500 mb-6">Update the chamber registration details for {selectedDoctor.name}.</p>
+
+            <form onSubmit={handleEditSubmit} className="space-y-5 max-h-[70vh] overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Doctor Name */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Doctor Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                {/* Specialty */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Specialty Category</label>
+                  <select
+                    value={editSpecialty}
+                    onChange={(e) => setEditSpecialty(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none text-slate-700 font-medium"
+                  >
+                    {['Cardiology', 'Gynecology', 'Pediatrics', 'Dermatology', 'Neurology', 'General Medicine'].map((spec) => (
+                      <option key={spec} value={spec}>{spec}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Degrees */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Degrees / Credentials</label>
+                  <input
+                    type="text"
+                    required
+                    value={editDegrees}
+                    onChange={(e) => setEditDegrees(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                {/* Visiting Fee */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Visiting Fee (BDT)</label>
+                  <input
+                    type="number"
+                    required
+                    min="500"
+                    max="2000"
+                    value={editVisitingFee}
+                    onChange={(e) => setEditVisitingFee(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                {/* Location */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">District Location</label>
+                  <select
+                    value={editLocation}
+                    onChange={(e) => setEditLocation(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none text-slate-700 font-medium"
+                  >
+                    {['Dhaka', 'Chattogram', 'Sylhet', 'Khulna', 'Rajshahi', 'Barishal', 'Rangpur', 'Mymensingh'].map((loc) => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Image URL */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Profile Image URL</label>
+                  <input
+                    type="url"
+                    required
+                    value={editImageUrl}
+                    onChange={(e) => setEditImageUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Chamber Address */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-700 uppercase">Chamber Full Address</label>
+                <input
+                  type="text"
+                  required
+                  value={editChamber}
+                  onChange={(e) => setEditChamber(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-700 uppercase">About the Doctor / Biography</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none"
+                ></textarea>
+              </div>
+
+              {/* Schedule Slots */}
+              <div className="space-y-2 border-t border-slate-100 pt-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold text-slate-700 uppercase">Chamber Schedule Slots</label>
+                  <button
+                    type="button"
+                    onClick={addScheduleField}
+                    className="text-[10px] font-bold text-primary hover:underline"
+                  >
+                    + Add Slot
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {editSchedule.map((slot, index) => (
+                    <div key={index} className="flex items-center space-x-1">
+                      <div className="relative flex-grow">
+                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
+                        <input
+                          type="text"
+                          required
+                          value={slot}
+                          onChange={(e) => handleScheduleChange(index, e.target.value)}
+                          placeholder="e.g. Saturday: 05:00 PM - 08:00 PM"
+                          className="w-full pl-8 pr-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none"
+                        />
+                      </div>
+                      {editSchedule.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeScheduleField(index)}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                        >
+                          <X className="w-4.5 h-4.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Submit / Cancel buttons */}
+              <div className="flex items-center justify-end space-x-3 border-t border-slate-100 pt-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 border border-slate-200 hover:border-slate-300 text-xs font-bold text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="px-5 py-2 bg-primary hover:bg-primary-dark text-white font-bold rounded-xl text-xs transition-colors shadow-md shadow-primary/10 disabled:opacity-50"
+                >
+                  {editLoading ? 'Saving changes...' : 'Save Profile Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
