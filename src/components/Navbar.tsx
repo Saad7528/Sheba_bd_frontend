@@ -57,12 +57,16 @@ const Navbar: React.FC = () => {
                 <NavLink to="/manage-appointments" className={linkClass}>
                   Appointments
                 </NavLink>
-                <NavLink to="/items/manage" className={linkClass}>
-                  Manage Profiles
-                </NavLink>
-                <NavLink to="/items/add" className={linkClass}>
-                  Add Profile
-                </NavLink>
+                {user && (user.role === 'doctor' || user.role === 'admin') && (
+                  <>
+                    <NavLink to="/items/manage" className={linkClass}>
+                      Manage Profiles
+                    </NavLink>
+                    <NavLink to="/items/add" className={linkClass}>
+                      Add Profile
+                    </NavLink>
+                  </>
+                )}
               </>
             )}
             <NavLink to="/about" className={linkClass}>
@@ -141,12 +145,16 @@ const Navbar: React.FC = () => {
                 <NavLink to="/manage-appointments" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
                   Appointments
                 </NavLink>
-                <NavLink to="/items/manage" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
-                  Manage Profiles
-                </NavLink>
-                <NavLink to="/items/add" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
-                  Add Profile
-                </NavLink>
+                {user && (user.role === 'doctor' || user.role === 'admin') && (
+                  <>
+                    <NavLink to="/items/manage" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                      Manage Profiles
+                    </NavLink>
+                    <NavLink to="/items/add" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+                      Add Profile
+                    </NavLink>
+                  </>
+                )}
               </>
             )}
             <NavLink to="/about" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
